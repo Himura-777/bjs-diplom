@@ -9,7 +9,7 @@ user.loginFormCallback = function (data) {
 		if (response.success === true) {
 			location.reload();
 		} else {
-			useFormObject.setLoginErrorMessage(`Произошла ошибка: ${response.error}`);
+			user.setLoginErrorMessage(`Произошла ошибка: ${response.error}`);
 		}
 	});
 };
@@ -21,9 +21,7 @@ user.registerFormCallback = function (data) {
 		if (response.success === true) {
 			location.reload();
 		} else {
-			useFormObject.setRegisterErrorMessage(
-				`Произошла ошибка: ${response.error}`
-			);
+			user.setRegisterErrorMessage(`Произошла ошибка: ${response.error}`);
 		}
 	});
 };
