@@ -33,7 +33,7 @@ setInterval(getCurrentRates, 60000);
 // Операции с деньгами
 const moneyManger = new MoneyManager();
 moneyManger.addMoneyCallback = function () {
-	addMoneyAction();
+	moneyManger.addMoneyAction();
 	if (response.success === true) {
 		showProfile(response.data);
 		setMessage('Пополнение прошло успешно.');
@@ -43,7 +43,7 @@ moneyManger.addMoneyCallback = function () {
 };
 
 moneyManger.conversionMoneyCallback = function () {
-	convertMoney();
+	moneyManger.convertMoney();
 	if (response.success === true) {
 		showProfile(response.data);
 		setMessage('Конвертирование прошло успешно.');
@@ -53,11 +53,45 @@ moneyManger.conversionMoneyCallback = function () {
 };
 
 moneyManger.sendMoneyCallback = function () {
-	transferMoney();
+	moneyManger.transferMoney();
 	if (response.success === true) {
 		showProfile(response.data);
 		setMessage('Перевод прошёл успешно.');
 	} else {
 		setMessage(`Ошибка перевода: ${response.error}`);
+	}
+};
+
+// Работа с избранным
+const favoritesWidget = new FavoritesWidget();
+favoritesWidget.getFavorites(() => {
+	if (response.success === true) {
+		clearTable();
+		fillTable(response.data);
+		updateUsersList();
+	}
+});
+
+favoritesWidget.addUserCallback = function () {
+	favoritesWidget.addUserToFavorites();
+	if (response.success === true) {
+		clearTable();
+		fillTable(response.data);
+		updateUsersList();
+		setMessage('Добавление прошло успешно.');
+	} else {
+		setMessage(`Ошибка добавления: ${response.error}`);
+	}
+};
+
+favoritesWidget.removeUserCallback = function () {
+	favoritesWidget.removeUserFromFavorites();
+	if (response.success === true) {
+		clearTable();
+		fillTable(response.data);
+		updateUsersList();
+		setMessage('Удаление прошло успешно.');
+	} else {
+		setMessage(`Ошибка удаления: ${response.error}`);
 	}
 };
