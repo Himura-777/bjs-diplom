@@ -1,29 +1,34 @@
-const { response } = require('express');
+const logoutButton = new LogoutButton();
+const ratesBoard = new RatesBoard();
+const moneyManger = new MoneyManager();
+const favoritesWidget = new FavoritesWidget();
 
 // Выход из личного кабинета
-const logOut = new LogoutButton();
-logOut.action(() => {
+logoutButton.action(() => {
 	if (response.success === true) {
 		location.reload();
+	} else {
+		setMessage(`Ошибка выхода: ${response.error}`);
 	}
 });
 
 // Получение информации о пользователе
-function getCurrentUser() {
-	ApiConnector.current(response => {
-		if (response.success) {
-			ProfileWidget.showProfile(response.data);
-		}
-	});
-}
+ApiConnector.current(response => {
+	if (response.success) {
+		ProfileWidget.showProfile(response.data);
+	} else {
+		setMessage(`Ошибка получения: ${response.error}`);
+	}
+});
 
 // Получение текущих курсов валюты
 function getCurrentRates() {
-	const rates = new RatesBoard();
 	ApiConnector.getStocks(response => {
 		if (response.success) {
-			rates.clearTable();
-			rates.fillTable();
+			ratesBoard.clearTable();
+			ratesBoard.fillTable();
+		} else {
+			setMessage(`Ошибка получения: ${response.error}`);
 		}
 	});
 }
@@ -31,7 +36,6 @@ getCurrentRates();
 setInterval(getCurrentRates, 60000);
 
 // Операции с деньгами
-const moneyManger = new MoneyManager();
 moneyManger.addMoneyCallback = function () {
 	moneyManger.addMoneyAction();
 	if (response.success === true) {
@@ -63,12 +67,13 @@ moneyManger.sendMoneyCallback = function () {
 };
 
 // Работа с избранным
-const favoritesWidget = new FavoritesWidget();
 favoritesWidget.getFavorites(() => {
 	if (response.success === true) {
 		clearTable();
 		fillTable(response.data);
 		updateUsersList();
+	} else {
+		setMessage(`Ошибка запроса: ${response.error}`);
 	}
 });
 

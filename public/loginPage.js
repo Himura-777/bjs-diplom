@@ -1,8 +1,8 @@
 'use strict';
 
-const user = new useForm();
+const userForm = new UserForm();
 
-user.loginFormCallback = function (data) {
+userForm.loginFormCallback = function (data) {
 	ApiConnector.login(data, function (response) {
 		console.log('Ответ сервера:', response);
 
@@ -14,7 +14,7 @@ user.loginFormCallback = function (data) {
 	});
 };
 
-user.registerFormCallback = function (data) {
+userForm.registerFormCallback = function (data) {
 	ApiConnector.register(data, function (response) {
 		console.log('Ответ сервера:', response);
 
