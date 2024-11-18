@@ -1,23 +1,21 @@
 const logoutButton = new LogoutButton();
 const ratesBoard = new RatesBoard();
-const moneyManger = new MoneyManager();
+const moneyManager = new MoneyManager();
 const favoritesWidget = new FavoritesWidget();
 
 // Выход из личного кабинета
-logoutButton.action(() => {
-	if (response.success === true) {
-		location.reload();
-	} else {
-		setMessage(`Ошибка выхода: ${response.error}`);
-	}
-});
+logoutButton.action = () => {
+	ApiConnector.logout(response => {
+		if (response.success === true) {
+			location.reload();
+		}
+	});
+};
 
 // Получение информации о пользователе
 ApiConnector.current(response => {
-	if (response.success) {
+	if (response.success === true) {
 		ProfileWidget.showProfile(response.data);
-	} else {
-		setMessage(`Ошибка получения: ${response.error}`);
 	}
 });
 
@@ -26,77 +24,89 @@ function getCurrentRates() {
 	ApiConnector.getStocks(response => {
 		if (response.success) {
 			ratesBoard.clearTable();
-			ratesBoard.fillTable();
+			ratesBoard.fillTable(response.data);
 		} else {
-			setMessage(`Ошибка получения: ${response.error}`);
+			moneyManger.setMessage(response.success, 'Something wrong');
 		}
 	});
 }
 getCurrentRates();
-setInterval(getCurrentRates, 60000);
+let updateBoard = setInterval(getCurrentRates, 60000);
 
 // Операции с деньгами
-moneyManger.addMoneyCallback = function () {
-	moneyManger.addMoneyAction();
-	if (response.success === true) {
-		showProfile(response.data);
-		setMessage('Пополнение прошло успешно.');
-	} else {
-		setMessage(`Ошибка пополнения: ${response.error}`);
-	}
+moneyManager.addMoneyCallback = data => {
+	ApiConnector.addMoney(data, response => {
+		if (response.success === true) {
+			ProfileWidget.showProfile(response.data);
+			moneyManager.setMessage(response.success, 'Счёт успешно пополнен');
+		} else {
+			moneyManager.setMessage(response.success, response.error);
+		}
+	});
 };
 
-moneyManger.conversionMoneyCallback = function () {
-	moneyManger.convertMoney();
-	if (response.success === true) {
-		showProfile(response.data);
-		setMessage('Конвертирование прошло успешно.');
-	} else {
-		setMessage(`Ошибка конвертирования: ${response.error}`);
-	}
+moneyManager.conversionMoneyCallback = data => {
+	ApiConnector.convertMoney(data, response => {
+		if (response.success === true) {
+			ProfileWidget.showProfile(response.data);
+			moneyManager.setMessage(
+				response.success,
+				'Валюта успешно конвертирована'
+			);
+		} else {
+			moneyManager.setMessage(response.success, response.error);
+		}
+	});
 };
 
-moneyManger.sendMoneyCallback = function () {
-	moneyManger.transferMoney();
-	if (response.success === true) {
-		showProfile(response.data);
-		setMessage('Перевод прошёл успешно.');
-	} else {
-		setMessage(`Ошибка перевода: ${response.error}`);
-	}
+moneyManager.sendMoneyCallback = data => {
+	ApiConnector.transferMoney(data, response => {
+		if (response.success === true) {
+			ProfileWidget.showProfile(response.data);
+			moneyManager.setMessage(response.success, 'Перевод выполнен успешно');
+		} else {
+			moneyManager.setMessage(response.success, response.error);
+		}
+	});
 };
 
 // Работа с избранным
-favoritesWidget.getFavorites(() => {
-	if (response.success === true) {
-		clearTable();
-		fillTable(response.data);
-		updateUsersList();
-	} else {
-		setMessage(`Ошибка запроса: ${response.error}`);
-	}
-});
+const getFavorites = () => {
+	ApiConnector.getFavorites(response => {
+		if (response.success === true) {
+			favoritesWidget.clearTable();
+			favoritesWidget.fillTable(response.data);
+			moneyManager.updateUsersList(response.data);
+		} else {
+			setMessage(`Ошибка запроса: ${response.error}`);
+		}
+	});
+};
+getFavorites();
 
-favoritesWidget.addUserCallback = function () {
-	favoritesWidget.addUserToFavorites();
-	if (response.success === true) {
-		clearTable();
-		fillTable(response.data);
-		updateUsersList();
-		setMessage('Добавление прошло успешно.');
-	} else {
-		setMessage(`Ошибка добавления: ${response.error}`);
-	}
+favoritesWidget.addUserCallback = data => {
+	ApiConnector.addUserToFavorites(data, response => {
+		if (response.success === true) {
+			MoneyManager.setMessage(
+				response.success,
+				'Пользователь добавлен в список Избранное'
+			);
+			getFavorites();
+		} else {
+			setMessage(response.success, response.error);
+		}
+	});
 };
 
-favoritesWidget.removeUserCallback = function () {
-	favoritesWidget.removeUserFromFavorites();
+favoritesWidget.removeUserCallback = data => {
+	ApiConnector.removeUserFromFavorites();
 	if (response.success === true) {
-		clearTable();
-		fillTable(response.data);
-		updateUsersList();
-		setMessage('Удаление прошло успешно.');
+		MoneyManager.setMessage(
+			response.success,
+			'Пользователь удален из списка Избранное'
+		);
+		getFavorites();
 	} else {
-		setMessage(`Ошибка удаления: ${response.error}`);
+		setMessage(response.success, response.error);
 	}
 };
