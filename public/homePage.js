@@ -26,7 +26,7 @@ function getCurrentRates() {
 			ratesBoard.clearTable();
 			ratesBoard.fillTable(response.data);
 		} else {
-			moneyManger.setMessage(response.success, 'Something wrong');
+			moneyManger.setMessage(response.success, "Something wrong");
 		}
 	});
 }
@@ -38,7 +38,7 @@ moneyManager.addMoneyCallback = data => {
 	ApiConnector.addMoney(data, response => {
 		if (response.success === true) {
 			ProfileWidget.showProfile(response.data);
-			moneyManager.setMessage(response.success, 'Счёт успешно пополнен');
+			moneyManager.setMessage(response.success, "Счёт успешно пополнен");
 		} else {
 			moneyManager.setMessage(response.success, response.error);
 		}
@@ -51,7 +51,7 @@ moneyManager.conversionMoneyCallback = data => {
 			ProfileWidget.showProfile(response.data);
 			moneyManager.setMessage(
 				response.success,
-				'Валюта успешно конвертирована'
+				"Валюта успешно конвертирована"
 			);
 		} else {
 			moneyManager.setMessage(response.success, response.error);
@@ -63,7 +63,7 @@ moneyManager.sendMoneyCallback = data => {
 	ApiConnector.transferMoney(data, response => {
 		if (response.success === true) {
 			ProfileWidget.showProfile(response.data);
-			moneyManager.setMessage(response.success, 'Перевод выполнен успешно');
+			moneyManager.setMessage(response.success, "Перевод выполнен успешно");
 		} else {
 			moneyManager.setMessage(response.success, response.error);
 		}
@@ -86,27 +86,28 @@ getFavorites();
 
 favoritesWidget.addUserCallback = data => {
 	ApiConnector.addUserToFavorites(data, response => {
-		if (response.success === true) {
-			MoneyManager.setMessage(
+		if (response.success) {
+			moneyManager.setMessage(
 				response.success,
-				'Пользователь добавлен в список Избранное'
+				"Пользователь добавлен в список Избранное"
 			);
 			getFavorites();
 		} else {
-			setMessage(response.success, response.error);
+			moneyManager.setMessage(response.success, response.error);
 		}
 	});
 };
 
 favoritesWidget.removeUserCallback = data => {
-	ApiConnector.removeUserFromFavorites();
-	if (response.success === true) {
-		MoneyManager.setMessage(
-			response.success,
-			'Пользователь удален из списка Избранное'
-		);
-		getFavorites();
-	} else {
-		setMessage(response.success, response.error);
-	}
+	ApiConnector.removeUserFromFavorites(data, response => {
+		if (response.success) {
+			moneyManager.setMessage(
+				response.success,
+				"Пользователь удален из списка Избранное"
+			);
+			getFavorites();
+		} else {
+			moneyManager.setMessage(response.success, response.error);
+		}
+	});
 };
